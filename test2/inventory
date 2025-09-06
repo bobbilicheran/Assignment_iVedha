@@ -1,3 +1,7 @@
+# Inventory file for assignment
+# host1, host2, host3 are placeholders for demonstration
+# Replace ansible_host values with real IPs or hostnames if available
+
 [httpd]
 host1 ansible_host=192.168.1.10
 
