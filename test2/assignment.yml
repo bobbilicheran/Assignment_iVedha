@@ -1,0 +1,33 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Verify service installation
+      yum:
+        name: httpd
+        state: present
+      when: action == "verify_install"
+
+    - name: Check disk usage
+      shell: df -h --output=pcent /
+      register: disk_usage
+      when: action == "check-disk"
+
+    - name: Alert if disk usage > 80%
+      mail:
+        to: "admin@example.com"
+        subject: "Disk Usage Alert on {{ inventory_hostname }}"
+        body: "Disk usage exceeded 80%: {{ disk_usage.stdout }}"
+      when: action == "check-disk" and (disk_usage.stdout | regex_replace('[^0-9]', '') | int) > 80
+
+    - name: Check application status via REST API
+      uri:
+        url: "http://localhost:5000/healthcheck"
+        method: GET
+        return_content: yes
+      register: app_status
+      when: action == "check-status"
+
+    - debug:
+        msg: "Application status: {{ app_status.content }}"
+      when: action == "check-status"
+      
